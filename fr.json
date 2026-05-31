@@ -1,0 +1,15 @@
+{
+  "title": "EmoVibe – Votre humeur, Votre vibe, Votre chanson",
+  "login": "Se connecter",
+  "signup": "Créer un compte",
+  "welcome": "Bon retour,",
+  "journal_placeholder": "Écrivez votre journal ici...",
+  "detect_mood": "Détecter l'humeur",
+  "weather": "Météo actuelle",
+  "add_song": "Ajouter votre chanson",
+  "song_title": "Titre de la chanson",
+  "artist": "Artiste",
+  "submit": "Soumettre",
+  "language": "Langue",
+  "select_language": "Choisir la langue"
+}

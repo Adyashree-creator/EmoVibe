@@ -1,0 +1,15 @@
+{
+  "title": "EmoVibe – Your Mood, Your Vibe, Your Song",
+  "login": "Log In",
+  "signup": "Sign Up",
+  "welcome": "Welcome back,",
+  "journal_placeholder": "Write your journal entry here...",
+  "detect_mood": "Detect Mood",
+  "weather": "Current Weather",
+  "add_song": "Add Your Song",
+  "song_title": "Song Title",
+  "artist": "Artist",
+  "submit": "Submit",
+  "language": "Language",
+  "select_language": "Select Language"
+}
