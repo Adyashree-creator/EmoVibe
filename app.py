@@ -202,13 +202,14 @@ st.sidebar.write("---")
 
 # Define lists of Categories for adding songs
 default_songs = load_default_songs()
+# Load songs specifically for the currently logged-in user to maintain isolated private music spaces
 user_songs_raw = get_user_songs(st.session_state.username)
 
 emotion_moods = ["happy", "sad", "anxious", "angry", "neutral", "romantic", "energetic", "lazy"]
 weather_moods = ["sunny", "rainy", "cloudy", "snowy", "stormy"]
 all_categories = emotion_moods + weather_moods
 
-# Private Music section in Sidebar
+# Private Music section in Sidebar (visible to all logged-in users, isolated to their own account)
 st.sidebar.subheader(f"🎵 {t('add_song')}")
 with st.sidebar.expander(f"➕ {t('add_song')}"):
     category_type = st.radio("Category Type", ["Emotion Mood", "Weather Vibe"])
