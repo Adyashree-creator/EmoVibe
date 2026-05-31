@@ -124,7 +124,7 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.username = login_user_input
                 st.success(f"Welcome back, {login_user_input}! 🎉")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Incorrect username or password.")
     else:
@@ -152,7 +152,7 @@ if st.sidebar.button("🚪 Logout"):
     st.session_state.username = ""
     st.session_state.lang_code = "en"
     st.session_state.detected_lang = ""
-    st.experimental_rerun()
+    st.rerun()
 
 st.sidebar.write("---")
 
@@ -224,7 +224,7 @@ with st.sidebar.expander(f"➕ {t('add_song')}"):
         if new_song_name and new_song_link:
             if add_user_song(st.session_state.username, selected_category, new_song_name, new_song_link):
                 st.success("Song saved to your private list!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Could not save. Please try again.")
         else:
@@ -250,7 +250,7 @@ with st.sidebar.expander("👀 View & Delete My Songs"):
                 song_id = next(s["id"] for s in my_songs if s["song_name"] == to_delete)
                 delete_user_song(song_id)
                 st.success("Deleted! Refreshing...")
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.write("No private songs saved under this category yet.")
 
@@ -459,7 +459,7 @@ if st.button("Generate Healing Experience 🌟"):
             }
 
             if run_rerun:
-                st.experimental_rerun()
+                st.rerun()
 
 # ─── Render Persisted Healing Results ─────────────────────────────────────────
 if st.session_state.healing_results:
