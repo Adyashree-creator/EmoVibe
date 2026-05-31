@@ -103,17 +103,8 @@ i18n.set_locale(st.session_state.lang_code)
 if not st.session_state.logged_in:
     st.markdown("""
     <style>
-        .stApp { background: linear-gradient(135deg, #121214, #1a1a24); }
-        h1, h2, h3, p, label { color: white !important; }
-        .stTextInput input { background: #222230; color: white; border-radius: 10px; border: 1px solid #333344; }
-        .stButton button { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 8px; border: none; }
-        .stRadio, div[data-testid="stRadio"], div[role="radiogroup"] {
-            background-color: #222230 !important;
-            padding: 15px !important;
-            border-radius: 10px !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-            margin-bottom: 20px !important;
-            border: 1px solid #333344;
+        .stApp {
+            background: linear-gradient(135deg, #121214, #1a1a24);
         }
     </style>
     """, unsafe_allow_html=True)
