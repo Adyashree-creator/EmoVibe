@@ -1,0 +1,15 @@
+{
+  "title": "EmoVibe – Tu estado de ánimo, Tu vibra, Tu canción",
+  "login": "Iniciar sesión",
+  "signup": "Crear cuenta",
+  "welcome": "¡Bienvenido de nuevo,",
+  "journal_placeholder": "Escribe tu entrada de diario aquí...",
+  "detect_mood": "Detectar estado de ánimo",
+  "weather": "Clima actual",
+  "add_song": "Agregar tu canción",
+  "song_title": "Título de la canción",
+  "artist": "Artista",
+  "submit": "Enviar",
+  "language": "Idioma",
+  "select_language": "Seleccionar idioma"
+}
