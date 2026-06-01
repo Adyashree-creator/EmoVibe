@@ -332,7 +332,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ─── Main UI ──────────────────────────────────────────────────────────────────
-st.title(f"🎵 {t('title')}")
+st.title(f"🎵 {t('EmoVibe — Your Mood, Your Vibe, Your Song')}")
 
 # Display Glassmorphic Weather Widget
 if weather_choice != "None":
