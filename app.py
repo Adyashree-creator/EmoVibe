@@ -124,7 +124,7 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.username = login_user_input
                 st.success(f"Welcome back, {login_user_input}! 🎉")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Incorrect username or password.")
     else:
@@ -152,7 +152,7 @@ if st.sidebar.button("🚪 Logout"):
     st.session_state.username = ""
     st.session_state.lang_code = "en"
     st.session_state.detected_lang = ""
-    st.experimental_rerun()
+    st.rerun()
 
 st.sidebar.write("---")
 
@@ -202,13 +202,14 @@ st.sidebar.write("---")
 
 # Define lists of Categories for adding songs
 default_songs = load_default_songs()
+# Load songs specifically for the currently logged-in user to maintain isolated private music spaces
 user_songs_raw = get_user_songs(st.session_state.username)
 
 emotion_moods = ["happy", "sad", "anxious", "angry", "neutral", "romantic", "energetic", "lazy"]
 weather_moods = ["sunny", "rainy", "cloudy", "snowy", "stormy"]
 all_categories = emotion_moods + weather_moods
 
-# Private Music section in Sidebar
+# Private Music section in Sidebar (visible to all logged-in users, isolated to their own account)
 st.sidebar.subheader(f"🎵 {t('add_song')}")
 with st.sidebar.expander(f"➕ {t('add_song')}"):
     category_type = st.radio("Category Type", ["Emotion Mood", "Weather Vibe"])
@@ -224,7 +225,7 @@ with st.sidebar.expander(f"➕ {t('add_song')}"):
         if new_song_name and new_song_link:
             if add_user_song(st.session_state.username, selected_category, new_song_name, new_song_link):
                 st.success("Song saved to your private list!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error("Could not save. Please try again.")
         else:
@@ -250,7 +251,7 @@ with st.sidebar.expander("👀 View & Delete My Songs"):
                 song_id = next(s["id"] for s in my_songs if s["song_name"] == to_delete)
                 delete_user_song(song_id)
                 st.success("Deleted! Refreshing...")
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.write("No private songs saved under this category yet.")
 
@@ -327,6 +328,14 @@ st.markdown(f"""
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(255, 117, 140, 0.6) !important;
     }}
+    
+    /* Hide Streamlit development tools, main menu, headers, footers, and deploy buttons to secure and hide code view */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    div[data-testid="stDecoration"] {display: none;}
+    div[data-testid="stHeader"] {display: none;}
+    .stDeployButton {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -351,7 +360,65 @@ selection_mode = st.radio(
     horizontal=True
 )
 
-user_input = st.text_area(t("journal_placeholder"), height=150)
+# Initialize session state for pre-filling text area if needed
+if "journal_text" not in st.session_state:
+    st.session_state.journal_text = ""
+
+# Quick Vibe Check Buttons
+st.markdown("### ✨ Quick Vibe Check")
+st.write("Click a vibe below to instantly load music without writing a journal entry:")
+
+vibes_info = [
+    ("❤️ Romantic", "romantic", "I am feeling so romantic today, thinking about my special someone."),
+    ("😊 Happy", "happy", "Today was an amazing day! Everything is going so well and I feel happy."),
+    ("😢 Sad", "sad", "I'm feeling a bit down and sad today, looking for some comfort."),
+    ("⚡ Energetic", "energetic", "I feel so alive, full of energy, and ready to party!"),
+    ("😴 Lazy", "lazy", "I just want to lie down in bed, feel lazy, and do nothing today."),
+    ("😰 Anxious", "anxious", "I am feeling really stressed, overthinking, and anxious about things."),
+    ("😡 Angry", "angry", "I'm feeling so frustrated, angry, and annoyed right now."),
+    ("😐 Neutral", "neutral", "It was a calm, ordinary, and peaceful day today.")
+]
+
+btn_cols = st.columns(8)
+for i, (label, mood_name, default_phrase) in enumerate(vibes_info):
+    if btn_cols[i].button(label, key=f"quick_{mood_name}", use_container_width=True):
+        st.session_state.journal_text = default_phrase
+        
+        # Immediately perform detection
+        english_text, lang_code = mood.translate_and_detect_language(default_phrase)
+        st.session_state.detected_lang = lang_code
+        emotion_list = mood.detect_mood_probabilities(english_text)
+        
+        # Build blended playlist
+        blended_playlist = []
+        seen_cores = set()
+        for fine_em, expl, core in emotion_list:
+            if core not in seen_cores:
+                songs = get_merged_songs(core)
+                for s in songs:
+                    blended_playlist.append({
+                        "name": s["name"],
+                        "url":  s["url"],
+                        "tag":  fine_em.capitalize()
+                    })
+                seen_cores.add(core)
+        
+        if active_weather["key"]:
+            w_key = active_weather["key"]
+            for s in get_merged_songs(w_key):
+                blended_playlist.append({
+                    "name": "🌦️ {} Vibe: {}".format(weather_choice.split()[0], s["name"]),
+                    "url":  s["url"],
+                    "tag":  "Weather"
+                })
+        
+        st.session_state.healing_results = {
+            "emotion_list":    emotion_list,
+            "blended_playlist": blended_playlist
+        }
+        st.rerun()
+
+user_input = st.text_area(t("journal_placeholder"), value=st.session_state.journal_text, height=150)
 
 # Load color schemes for visual emotion feedback (keyed by core vibe)
 color_schemes = {
@@ -459,7 +526,7 @@ if st.button("Generate Healing Experience 🌟"):
             }
 
             if run_rerun:
-                st.experimental_rerun()
+                st.rerun()
 
 # ─── Render Persisted Healing Results ─────────────────────────────────────────
 if st.session_state.healing_results:
@@ -532,5 +599,65 @@ if st.session_state.healing_results:
 
     st.write("---")
     st.write("🔒 Your thoughts are processed securely and your privacy is fully protected.")
+
+# ─── EmoVibe Smart Recommender Section ────────────────────────────────────────
+st.write("---")
+st.subheader("🎧 EmoVibe Smart Recommender")
+st.write("Get personalized music recommendations based on the songs you've added to your private library.")
+
+# Session State for Recommender
+if "recommender_enabled" not in st.session_state:
+    st.session_state.recommender_enabled = False
+
+rec_col1, rec_col2 = st.columns(2)
+
+# Two distinct buttons for activation/deactivation
+if rec_col1.button("Activate Music Recommender 🎧", use_container_width=True):
+    st.session_state.recommender_enabled = True
+    st.rerun()
+
+if rec_col2.button("Deactivate Music Recommender 🔇", use_container_width=True):
+    st.session_state.recommender_enabled = False
+    st.rerun()
+
+# Render recommendations if active
+if st.session_state.recommender_enabled:
+    st.success("✅ Music Recommender is ACTIVE! Showing personalized recommendations below based on your added library.")
+    
+    import recommender
+    
+    # user_songs_raw contains all private songs the user added
+    if not user_songs_raw:
+        st.info("💡 Add some songs to your private library first using the sidebar so we can learn your taste and recommend related tracks!")
+    else:
+        # Fetch recommendations based on user library
+        recs = recommender.get_recommendations_from_itunes(user_songs_raw)
+        if recs:
+            st.markdown("### ✨ Handpicked Recommendations for You:")
+            
+            # Show recommendations in a clean row of columns
+            rec_cols = st.columns(min(len(recs), 3))
+            for idx, track in enumerate(recs[:3]):
+                with rec_cols[idx]:
+                    card_bg = "rgba(255, 255, 255, 0.1)"
+                    st.markdown(f"""
+                    <div style="background: {card_bg}; padding: 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; height: 100%; margin-bottom: 15px;">
+                        <img src="{track['artwork']}" style="border-radius: 8px; width: 80px; height: 80px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        <div style="font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;">{track['track_name']}</div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ddd;">{track['artist_name']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Audio preview player if available
+                    if track['preview_url']:
+                        st.audio(track['preview_url'], format="audio/m4a")
+                        
+                    # Find on Spotify button (custom style matching app)
+                    st.markdown(f'<a href="{track["spotify_search_url"]}" target="_blank" style="text-decoration: none;"><button style="width: 100%; padding: 8px; background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);">🔍 Find on Spotify</button></a>', unsafe_allow_html=True)
+        else:
+            st.info("Finding matching tracks... Add more songs to help us refine your profile!")
+else:
+    st.info("💤 Music Recommender is currently turned OFF. Click 'Activate Music Recommender' above to enable it.")
+
 
 
