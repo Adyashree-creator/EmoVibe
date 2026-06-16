@@ -330,12 +330,12 @@ st.markdown(f"""
     }}
     
     /* Hide Streamlit development tools, main menu, headers, footers, and deploy buttons to secure and hide code view */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    div[data-testid="stDecoration"] {display: none;}
-    div[data-testid="stHeader"] {display: none;}
-    .stDeployButton {display: none;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
+    div[data-testid="stDecoration"] {{display: none;}}
+    div[data-testid="stHeader"] {{display: none;}}
+    .stDeployButton {{display: none;}}
 </style>
 """, unsafe_allow_html=True)
 
