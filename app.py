@@ -26,53 +26,75 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def register_user(username, password):
-    check = requests.get(
-        f"{SUPABASE_URL}/rest/v1/users",
-        headers=HEADERS,
-        params={"username": f"eq.{username}"}
-    )
-    if check.json():
-        return False, "Username already taken. Please choose another."
-    res = requests.post(
-        f"{SUPABASE_URL}/rest/v1/users",
-        headers=HEADERS,
-        json={"username": username, "password_hash": hash_password(password)}
-    )
-    if res.status_code in [200, 201]:
-        return True, "Account created successfully!"
+    try:
+        check = requests.get(
+            f"{SUPABASE_URL}/rest/v1/users",
+            headers=HEADERS,
+            params={"username": f"eq.{username}"},
+            timeout=5
+        )
+        if check.json():
+            return False, "Username already taken. Please choose another."
+        res = requests.post(
+            f"{SUPABASE_URL}/rest/v1/users",
+            headers=HEADERS,
+            json={"username": username, "password_hash": hash_password(password)},
+            timeout=5
+        )
+        if res.status_code in [200, 201]:
+            return True, "Account created successfully!"
+    except Exception as e:
+        return False, "Database connection offline. Please try again later."
     return False, "Something went wrong. Please try again."
 
 def login_user(username, password):
-    res = requests.get(
-        f"{SUPABASE_URL}/rest/v1/users",
-        headers=HEADERS,
-        params={"username": f"eq.{username}", "password_hash": f"eq.{hash_password(password)}"}
-    )
-    return len(res.json()) > 0
+    try:
+        res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/users",
+            headers=HEADERS,
+            params={"username": f"eq.{username}", "password_hash": f"eq.{hash_password(password)}"},
+            timeout=5
+        )
+        return len(res.json()) > 0
+    except Exception as e:
+        st.error("Database connection offline. Please try again later.")
+        return False
 
 def get_user_songs(username):
-    res = requests.get(
-        f"{SUPABASE_URL}/rest/v1/user_songs",
-        headers=HEADERS,
-        params={"username": f"eq.{username}", "order": "id.asc"}
-    )
-    return res.json() if res.status_code == 200 else []
+    try:
+        res = requests.get(
+            f"{SUPABASE_URL}/rest/v1/user_songs",
+            headers=HEADERS,
+            params={"username": f"eq.{username}", "order": "id.asc"},
+            timeout=5
+        )
+        return res.json() if res.status_code == 200 else []
+    except Exception as e:
+        return []
 
 def add_user_song(username, emotion, song_name, song_url):
-    res = requests.post(
-        f"{SUPABASE_URL}/rest/v1/user_songs",
-        headers=HEADERS,
-        json={"username": username, "emotion": emotion, "song_name": song_name, "song_url": song_url}
-    )
-    return res.status_code in [200, 201]
+    try:
+        res = requests.post(
+            f"{SUPABASE_URL}/rest/v1/user_songs",
+            headers=HEADERS,
+            json={"username": username, "emotion": emotion, "song_name": song_name, "song_url": song_url},
+            timeout=5
+        )
+        return res.status_code in [200, 201]
+    except Exception as e:
+        return False
 
 def delete_user_song(song_id):
-    res = requests.delete(
-        f"{SUPABASE_URL}/rest/v1/user_songs",
-        headers=HEADERS,
-        params={"id": f"eq.{song_id}"}
-    )
-    return res.status_code in [200, 204]
+    try:
+        res = requests.delete(
+            f"{SUPABASE_URL}/rest/v1/user_songs",
+            headers=HEADERS,
+            params={"id": f"eq.{song_id}"},
+            timeout=5
+        )
+        return res.status_code in [200, 204]
+    except Exception as e:
+        return False
 
 # ─── Load Local Config ────────────────────────────────────────────────────────
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "music_config.json")
